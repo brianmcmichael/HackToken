@@ -80,4 +80,11 @@ contract Hacktoken is DSDeed {
         id = mint(guy, uri);
         winners[id] = Winner(true, false, uint192(badge_code));
     }
+
+    /**
+        @dev Contract owner can withdraw unused funds.
+    */
+    function defund() public auth {
+        DAI.transferFrom(address(this), msg.sender, DAI.balanceOf(address(this)));
+    }
 }
