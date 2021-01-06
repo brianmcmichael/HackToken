@@ -18,14 +18,15 @@ contract Hacktoken is DSDeed {
     Dai      public immutable DAI;
 
     struct Winner {
-        bool    valid;
-        bool    redeemed;
-        uint192 badge;
+        bool    valid;           // True if token is a prize winner
+        bool    redeemed;        // True if prize has been redeemed
+        uint192 badge;           // The identifier for the prize
     }
     mapping (uint256 => Winner)  public winners;  // TokenID => Winner data
 
     mapping (uint256 => uint256) public rewards;  // badge_code => reward amount
 
+    event PrizeAdded(uint256 badge_code, uint256 prize_amount);
     event Redeemed(uint256 tokenId);
 
     constructor(string memory name, string memory symbol) public DSDeed(name, symbol) {
@@ -35,29 +36,45 @@ contract Hacktoken is DSDeed {
     /**
         @dev Sets the reward amount for a badge code
         @param badge_code   A number representing the badge class
-        @param wad          The amount of Dai to pay a winner
+        @param wad          The amount of Dai to pay a winner (1 Dai = 10**18)
     */
     function setWinnerParams(uint256 badge_code, uint256 wad) public auth {
         require(badge_code < uint192(-1), "badge-code-max-exceeded");
         rewards[badge_code] = wad;
+        emit PrizeAdded(badge_code, wad);
     }
 
+    /**
+        @dev Allows the owner of a token to redeem it for a prize
+        @param token        The token id to redeem
+    */
     function redeem(uint256 token) external {
         require(this.ownerOf(token) == msg.sender, "only-redeemable-by-owner");
         Winner memory prospect = winners[token];
         require(prospect.valid, "not-a-winner");
         require(!prospect.redeemed, "prize-has-been-redeemed");
         uint256 reward = rewards[prospect.badge];
-        require(DAI.balanceOf(address(this)) >= reward, "insufficient-dai-for-award");
+        require(DAI.balanceOf(address(this)) >= reward, "insufficient-dai-balance-for-award");
         require(reward != 0, "no-dai-award");
         winners[token].redeemed = DAI.transferFrom(address(this), msg.sender, reward);
         emit Redeemed(token);
     }
 
+    /**
+        @dev Mint a winning token without a metadata URI. Requires auth on mint.
+        @param guy          The address of the recipient
+        @param badge_code   The prize code
+    */
     function mintWinner(address guy, uint256 badge_code) external returns (uint256 id) {
         return mintWinner(guy, badge_code, "");
     }
 
+    /**
+        @dev Mint a winning token with a metadata URI. Requires auth on mint.
+        @param guy          The address of the recipient
+        @param badge_code   The prize code
+        @param uri          A URL to provide a metadata url
+    */
     function mintWinner(address guy, uint256 badge_code, string memory uri) public returns (uint256 id) {
         require(badge_code < uint192(-1), "badge-code-max-exceeded");
         id = mint(guy, uri);
