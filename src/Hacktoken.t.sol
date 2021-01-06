@@ -8,7 +8,7 @@ contract HacktokenTest is DSTest {
     Hacktoken hacktoken;
 
     function setUp() public {
-        hacktoken = new Hacktoken();
+        hacktoken = new Hacktoken("Hackathon Token", "HAKTOK");
     }
 
     function testFail_basic_sanity() public {
