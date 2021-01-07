@@ -58,12 +58,6 @@ contract HacktokenTest is DSTest {
         hacktoken.redeem(0);
     }
 
-    function test_defund() public {
-        assertEq(hacktoken.DAI().balanceOf(address(this)), 0);
-        hacktoken.defund();
-        assertEq(hacktoken.DAI().balanceOf(address(this)), uint(9999 ether));
-    }
-
     function test_assign_winner() public {
         hacktoken.mint(address(this));
 
@@ -74,6 +68,68 @@ contract HacktokenTest is DSTest {
         assertTrue(hacktoken.isRedeemed(0));
 
         assertEq(hacktoken.DAI().balanceOf(address(this)), uint(1 ether));
+    }
+
+    function test_rewardAmount() public {
+        hacktoken.mint(address(this));
+
+        assertEq(hacktoken.rewardAmount(0), 0);
+
+        hacktoken.assignWinner(0, 3);
+
+        assertEq(hacktoken.rewardAmount(0), 1 ether);
+
+        hacktoken.redeem(0);
+
+        assertEq(hacktoken.rewardAmount(0), 0);
+
+        assertEq(hacktoken.DAI().balanceOf(address(this)), uint(1 ether));
+    }
+
+    function test_isWinner() public {
+        hacktoken.mint(address(this));
+
+        assertTrue(!hacktoken.isWinner(0));
+
+        hacktoken.assignWinner(0, 3);
+
+        assertTrue(hacktoken.isWinner(0));
+
+        hacktoken.redeem(0);
+
+        // Token is still a "winner" after redemption
+        assertTrue(hacktoken.isWinner(0));
+
+
+        hacktoken.mintWinner(address(this), 3);
+
+        assertTrue(hacktoken.isWinner(1));
+    }
+
+    function test_isRedeemed() public {
+        hacktoken.mint(address(this));
+
+        assertTrue(!hacktoken.isRedeemed(0));
+
+        hacktoken.assignWinner(0, 3);
+
+        assertTrue(!hacktoken.isRedeemed(0));
+
+        hacktoken.redeem(0);
+
+        // Token is still a "winner" after redemption
+        assertTrue(hacktoken.isRedeemed(0));
+
+
+        hacktoken.mintWinner(address(this), 3);
+
+        assertTrue(hacktoken.isWinner(1));
+    }
+
+    function test_defund() public {
+        assertEq(hacktoken.DAI().balanceOf(address(this)), 0);
+        hacktoken.defund();
+        assertEq(hacktoken.DAI().balanceOf(address(this)), uint(9999 ether));
     }
 
 }
