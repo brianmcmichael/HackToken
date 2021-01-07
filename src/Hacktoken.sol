@@ -110,6 +110,15 @@ contract Hacktoken is DSDeed {
         return (winners[tokenID].valid && winners[tokenID].redeemed);
     }
 
+    function rewardAmount(uint256 tokenID) external view returns (uint256) {
+        Winner memory prospect = winners[tokenID];
+        if (prospect.valid && !prospect.redeemed) {
+            return rewards[prospect.badge];
+        } else {
+            return 0;
+        }
+    }
+
     /**
         @dev Contract owner can withdraw unused funds.
     */
