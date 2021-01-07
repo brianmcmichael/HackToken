@@ -43,7 +43,9 @@ contract HacktokenTest is DSTest {
     function test_redeem_winner() public {
         hacktoken.mintWinner(address(this), 3);
 
+        assertTrue(!hacktoken.isRedeemed(0));
         hacktoken.redeem(0);
+        assertTrue(hacktoken.isRedeemed(0));
 
         assertEq(hacktoken.DAI().balanceOf(address(this)), uint(1 ether));
     }
