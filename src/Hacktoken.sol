@@ -102,6 +102,17 @@ contract Hacktoken is DSDeed {
         winners[id] = Winner(true, false, uint192(badge_code));
     }
 
+    /**
+        @dev Assign a prize to an existing token
+        @param tokenID      The NFT ID
+        @param badge_code   The prize code
+    */
+    function assignWinner(uint256 tokenID, uint256 badge_code) public auth {
+        require(this.ownerOf(tokenID) != address(0), "hacktoken-invalid-nft");
+        require(badge_code < uint192(-1), "badge-code-max-exceeded");
+        winners[tokenID] = Winner(true, false, uint192(badge_code));
+    }
+
     function isWinner(uint256 tokenID) external view returns (bool) {
         return winners[tokenID].valid;
     }

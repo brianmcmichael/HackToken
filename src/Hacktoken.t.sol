@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.6.11;
 
 import "ds-test/test.sol";
@@ -61,6 +62,18 @@ contract HacktokenTest is DSTest {
         assertEq(hacktoken.DAI().balanceOf(address(this)), 0);
         hacktoken.defund();
         assertEq(hacktoken.DAI().balanceOf(address(this)), uint(9999 ether));
+    }
+
+    function test_assign_winner() public {
+        hacktoken.mint(address(this));
+
+        hacktoken.assignWinner(0, 3);
+
+        assertTrue(!hacktoken.isRedeemed(0));
+        hacktoken.redeem(0);
+        assertTrue(hacktoken.isRedeemed(0));
+
+        assertEq(hacktoken.DAI().balanceOf(address(this)), uint(1 ether));
     }
 
 }
