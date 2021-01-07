@@ -57,4 +57,10 @@ contract HacktokenTest is DSTest {
         hacktoken.redeem(0);
     }
 
+    function test_defund() public {
+        assertEq(hacktoken.DAI().balanceOf(address(this)), 0);
+        hacktoken.defund();
+        assertEq(hacktoken.DAI().balanceOf(address(this)), uint(9999 ether));
+    }
+
 }
