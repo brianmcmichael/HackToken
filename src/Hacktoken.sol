@@ -61,8 +61,6 @@ contract Hacktoken is DSDeed {
         emit PrizeAdded(badge_code, wad);
     }
 
-    event Debug(uint256);
-
     /**
         @dev Allows the owner of a token to redeem it for a prize
         @param token        The token id to redeem
@@ -73,8 +71,6 @@ contract Hacktoken is DSDeed {
         require(prospect.valid, "not-a-winner");
         require(!prospect.redeemed, "prize-has-been-redeemed");
         uint256 reward = rewards[prospect.badge];
-        emit Debug(DAI.balanceOf(address(this)));
-        emit Debug(reward);
         require(DAI.balanceOf(address(this)) >= reward, "insufficient-dai-balance-for-award");
         require(reward != 0, "no-dai-award");
         winners[token].redeemed = DAI.transferFrom(address(this), msg.sender, reward);
